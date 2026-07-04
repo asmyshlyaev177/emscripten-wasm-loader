@@ -26,6 +26,25 @@ describe('getModuleLoader', () => {
     expect(loaded).to.equal('boo');
   });
 
+  it('should accept an ESM-namespace runtime module (factory on `default`)', async () => {
+    // An ESM bundler (webpack/rollup/vite/esbuild) represents `import * as runtime`
+    // of a MODULARIZE=1 (CJS) wasm module as a namespace object whose callable
+    // factory lives on `.default`, not the namespace itself. It must still load.
+    mockIsNode.mockReturnValueOnce(true);
+
+    const factoryLoader = jest.fn(() => 'boo');
+    const mockRuntime = { initializeRuntime: () => Promise.resolve(true) };
+    const factory = jest.fn(() => mockRuntime);
+    const runtimeNamespace = { default: factory };
+
+    const loader = getModuleLoader(factoryLoader as any, runtimeNamespace as any);
+    const loaded = await loader();
+
+    expect(factory.mock.calls).to.have.lengthOf(1);
+    expect((factoryLoader.mock.calls[0] as any)[0]).to.deep.equal(mockRuntime);
+    expect(loaded).to.equal('boo');
+  });
+
   it('should throw when init runtime fail', async () => {
     mockIsNode.mockReturnValueOnce(true);
 

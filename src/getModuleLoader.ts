@@ -61,7 +61,9 @@ const getModuleLoader: getModuleLoaderType = <T, R extends AsmRuntimeType>(
   log(`loadModule: constructed module object for runtime`);
 
   try {
-    const asmModule = runtimeModule(constructedModule);
+    const runtimeFactory: runtimeModuleType =
+      ((runtimeModule as unknown) as { default?: runtimeModuleType }).default || runtimeModule;
+    const asmModule = runtimeFactory(constructedModule);
     const result = await asmModule.initializeRuntime(timeout);
 
     if (!result) {

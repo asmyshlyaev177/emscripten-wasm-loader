@@ -1,7 +1,12 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "noEmit": false
+    "noEmit": false,
+    // src imports only nanoid/unixify/getroot. Without this, TypeScript 3.9 auto-includes
+    // every @types package in node_modules and fails to PARSE the modern ones
+    // (@types/lodash uses template literal types), so `prepare` cannot build on install.
+    "types": ["node"],
+    "skipLibCheck": true
   },
   "include": [
     "./**/*.ts"

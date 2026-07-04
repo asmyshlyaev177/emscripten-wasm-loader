@@ -1,9 +1,14 @@
-import * as unixify from 'unixify';
+import * as unixifyModule from 'unixify';
 import { FS } from '../BaseAsmModule';
 import { isNode } from '../util/isNode';
 import { log } from '../util/logger';
 import { isMounted } from './isMounted';
 import { mkdirTree } from './mkdirTree';
+
+// Same CJS/ESM shape as nanoid in ./mountBuffer - resolve the callable for both emits.
+const unixify: (path: string) => string =
+  ((unixifyModule as unknown) as { default?: (path: string) => string }).default ||
+  ((unixifyModule as unknown) as (path: string) => string);
 
 /**
  * Creates a function to mount phsyical path into wasm internal memory filesystem

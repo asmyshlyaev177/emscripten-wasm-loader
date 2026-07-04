@@ -1,7 +1,15 @@
-import * as nanoid from 'nanoid';
+import * as nanoidModule from 'nanoid';
 import { FS } from '../BaseAsmModule';
 import { log } from '../util/logger';
 import { isMounted } from './isMounted';
+
+// nanoid v2 is CJS (`module.exports = fn`). Without esModuleInterop the CommonJS
+// emit binds the function itself, while the ESM emit binds a namespace object whose
+// `default` is the function - calling the namespace throws there, and bundlers warn
+// on it (rolldown CANNOT_CALL_NAMESPACE). Resolve the callable for both emits.
+const nanoid: (size?: number) => string =
+  ((nanoidModule as unknown) as { default?: (size?: number) => string }).default ||
+  ((nanoidModule as unknown) as (size?: number) => string);
 
 /**
  * Creates a function to mount contents of file into wasm internal memory filesystem
